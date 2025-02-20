@@ -4,3 +4,5 @@ dist
 .yarn
 .vscode
 .npm
+
+.DS_Store
