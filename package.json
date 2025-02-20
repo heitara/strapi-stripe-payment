@@ -8,6 +8,34 @@
     "description": "Strapi integration plugin for Stripe payment system",
     "kind": "plugin"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "Strapi",
+    "Stripe",
+    "payment",
+    "strapi-plugin"
+  ],
+  "scripts": {
+    "develop": "tsc -p tsconfig.server.json -w",
+    "build": "tsc -p tsconfig.server.json",
+    "test": "jest",
+    "clean": "npx rimraf node_modules dist || exit 0",
+    "lint": "npx eslint . --ext ts,tsx --max-warnings 0 --fix",
+    "check-types": "npx tsc -p ./tsconfig.json --pretty --noEmit"
+  },
+  "author": "DBB-Software",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DBB-Software/strapi-stripe-payment.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DBB-Software/strapi-stripe-payment/issues"
+  },
+  "homepage": "https://github.com/DBB-Software/strapi-stripe-payment#readme",
   "dependencies": {
     "@sendgrid/mail": "8.1.4",
     "@strapi/design-system": "1.19.0",
@@ -44,26 +72,8 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
-  "author": {
-    "name": "A Strapi developer"
-  },
-  "maintainers": [
-    {
-      "name": "A Strapi developer"
-    }
-  ],
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "scripts": {
-    "develop": "tsc -p tsconfig.server.json -w",
-    "build": "tsc -p tsconfig.server.json",
-    "test": "jest",
-    "clean": "npx rimraf node_modules dist || exit 0",
-    "lint": "npx eslint . --ext ts,tsx --max-warnings 0 --fix",
-    "check-types": "npx tsc -p ./tsconfig.json --pretty --noEmit"
-  },
-  "license": "MIT",
-  "packageManager": "yarn@4.2.2+sha512.c44e283c54e02de9d1da8687025b030078c1b9648d2895a65aab8e64225bfb7becba87e1809fc0b4b6778bbd47a1e2ab6ac647de4c5e383a53a7c17db6c3ff4b"
+  }
 }
