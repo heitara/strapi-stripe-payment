@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "strapi": {
     "name": "stripe-payment",
+    "displayName": "Stripe Payment",
     "description": "Strapi integration plugin for Stripe payment system",
     "kind": "plugin"
   },
@@ -26,7 +27,7 @@
     "lint": "npx eslint . --ext ts,tsx --max-warnings 0 --fix",
     "check-types": "npx tsc -p ./tsconfig.json --pretty --noEmit"
   },
-  "author": "DBB-Software",
+  "author": "DBB Software",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -90,6 +91,13 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
