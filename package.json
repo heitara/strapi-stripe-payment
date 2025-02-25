@@ -1,6 +1,6 @@
 {
   "name": "@strapi/stripe-payment",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Strapi integration plugin for Stripe payment system",
   "main": "dist/index.js",
   "strapi": {
