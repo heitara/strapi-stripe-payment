@@ -18,8 +18,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
 
       - name: Setup Node.js from .tool-versions
         uses: actions/setup-node@v4
@@ -40,7 +38,7 @@ jobs:
       - name: Run Tests
         run: npm run test
 
-      - name: Build CLI
+      - name: Build Plugin
         run: npm run build
 
       - name: Authenticate with npm
@@ -54,8 +52,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref_name }}
-          body: "New release ${{ github.ref_name }} of CLI"
+          tag_name: main
+          name: Release from main branch
+          body: "New release from main branch"
           draft: false
           prerelease: false
