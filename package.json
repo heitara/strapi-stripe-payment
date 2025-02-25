@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/stripe-payment",
+  "name": "@dbbs/strapi-stripe-payment",
   "version": "0.0.1",
   "description": "Strapi integration plugin for Stripe payment system",
   "main": "dist/index.js",
