@@ -1,7 +1,7 @@
 import { SendgridService } from '../../server/services/sendgrid'
 import * as SendGrid from '@sendgrid/mail'
 import { ISendEmailInput } from '../../server/interfaces'
-import { ValidationError } from '@dbbs/common'
+import { ValidationError } from '../../dbbs-packages/common/errors'
 
 jest.mock('@sendgrid/mail', () => ({
   setApiKey: jest.fn().mockImplementation(() => {}),

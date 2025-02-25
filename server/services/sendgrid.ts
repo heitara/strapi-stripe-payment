@@ -1,6 +1,6 @@
 import * as SendGrid from '@sendgrid/mail'
 import { ISendEmailInput } from '../interfaces'
-import { ValidationError } from '../../common/errors'
+import { ValidationError } from '../../dbbs-packages/common/errors'
 
 /**
  * Service for sending emails using SendGrid.
