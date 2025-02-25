@@ -5,7 +5,3 @@ dist
 .vscode
 .npm
 
-.DS_Store
-
-.pnp.cjs
-.pnp.loader.mjs
