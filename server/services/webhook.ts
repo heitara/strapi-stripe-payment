@@ -3,7 +3,7 @@ import { Strapi } from '@strapi/strapi'
 import createHttpError from 'http-errors'
 
 import { BillingReason, PaymentMode, PaymentTransactionStatus, StripeEventType, SubscriptionStatus } from '../enums'
-import { Plan } from '../interfaces'
+import { Plan, Product } from '../interfaces'
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   async handleEvent(event: Stripe.Event) {
@@ -495,6 +495,22 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
   },
 
+  async deleteProduct(product: Product) {
+    const planStripeIds = product.plans.map((plan: Plan) => plan.stripe_id)
+
+    await strapi.query('plugin::stripe-payment.plan').deleteMany({
+      where: {
+        stripe_id: planStripeIds
+      }
+    })
+
+    await strapi.query('plugin::stripe-payment.product').delete({
+      where: {
+        id: product.id
+      }
+    })
+  },
+
   async handleProductUpdated(event: Stripe.ProductUpdatedEvent) {
     const product = await strapi.query('plugin::stripe-payment.product').findOne({
       where: {
@@ -507,6 +523,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     if (!product) {
       throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} not found`)
+    }
+
+    const isActive = event.data.object.active
+    if (!isActive) {
+      await this.deleteProduct(product)
+      return
     }
 
     const prices = await strapi
@@ -571,19 +593,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} not found`)
     }
 
-    const planStripeIds = product.plans.map((plan: Plan) => plan.stripe_id)
-
-    await strapi.query('plugin::stripe-payment.plan').deleteMany({
-      where: {
-        stripe_id: planStripeIds
-      }
-    })
-
-    await strapi.query('plugin::stripe-payment.product').delete({
-      where: {
-        id: product.id
-      }
-    })
+    await this.deleteProduct(product)
   },
 
   // TODO (#1113): Wrap payment method update with transaction
