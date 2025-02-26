@@ -2,7 +2,14 @@ import Stripe from 'stripe'
 import { Strapi } from '@strapi/strapi'
 import createHttpError from 'http-errors'
 
-import { BillingReason, PaymentMode, PaymentTransactionStatus, StripeEventType, SubscriptionStatus } from '../enums'
+import {
+  BillingReason,
+  PaymentMode,
+  PaymentTransactionStatus,
+  PlanType,
+  StripeEventType,
+  SubscriptionStatus
+} from '../enums'
 import { Plan, Product } from '../interfaces'
 
 export default ({ strapi }: { strapi: Strapi }) => ({
@@ -204,7 +211,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!subscription) {
-      throw new createHttpError.NotFound(`Subscription with stripe id ${event.data.object.subscription} are not found`)
+      throw new createHttpError.NotFound(`Subscription with stripe id ${event.data.object.subscription} was not found`)
     }
 
     if (subscription.status === SubscriptionStatus.ACTIVE) {
@@ -243,7 +250,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!subscription) {
-      throw new createHttpError.NotFound(`Subscription with stripe id ${event.data.object.subscription} are not found`)
+      throw new createHttpError.NotFound(`Subscription with stripe id ${event.data.object.subscription} was not found`)
     }
 
     if (subscription.status === SubscriptionStatus.UNPAID) {
@@ -360,7 +367,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!plan) {
-      throw new createHttpError.NotFound(`Plan with stripe id ${event.data.object.id} are not found`)
+      throw new createHttpError.NotFound(`Plan with stripe id ${event.data.object.id} was not found`)
     }
 
     await strapi.query('plugin::stripe-payment.plan').delete({
@@ -378,7 +385,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!existedPlan) {
-      throw new createHttpError.NotFound(`Plan with stripe id ${event.data.object.id} are not found`)
+      throw new createHttpError.NotFound(`Plan with stripe id ${event.data.object.id} was not found`)
     }
 
     const product = await strapi.query('plugin::stripe-payment.product').findOne({
@@ -391,19 +398,32 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!product) {
-      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.product} are not found`)
+      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.product} was not found`)
     }
 
-    const updatedPlans = event.data.object.active
-      ? [...product.plans, existedPlan]
-      : product.plans.filter((plan: Plan) => plan.stripe_id !== event.data.object.id)
+    const planInterval = event.data.object.recurring?.interval
+    const updatedPlan = await strapi.query('plugin::stripe-payment.plan').update({
+      where: { stripe_id: event.data.object.id },
+      data: {
+        price: (event.data.object.unit_amount as number) / 100,
+        interval: planInterval,
+        stripe_id: event.data.object.id,
+        type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
+        product: product.id
+      }
+    })
+
+    const newPlansList = product.plans.filter((plan: Plan) => plan.stripe_id !== event.data.object.id)
+    if (event.data.object.active) {
+      newPlansList.push(updatedPlan)
+    }
 
     await strapi.query('plugin::stripe-payment.product').update({
       where: {
         id: product.id
       },
       data: {
-        plans: updatedPlans
+        plans: newPlansList
       }
     })
   },
@@ -429,14 +449,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!product) {
-      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.product} are not found`)
+      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.product} was not found`)
     }
 
+    const planInterval = event.data.object.recurring?.interval
     const savedPlan = await strapi.query('plugin::stripe-payment.plan').create({
       data: {
         price: (event.data.object.unit_amount as number) / 100,
-        interval: event.data.object.recurring?.interval,
+        interval: planInterval,
         stripe_id: event.data.object.id,
+        type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
         product: product.id
       }
     })
@@ -476,21 +498,31 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     const price = prices.data[0]
 
-    const savedPlan = await strapi.query('plugin::stripe-payment.plan').create({
-      data: {
-        price: price.unit_amount / 100,
-        interval: price.recurring?.interval,
-        stripe_id: price.id,
-        product: savedProduct.id
+    let savedPlan = await strapi.query('plugin::stripe-payment.plan').findOne({
+      where: {
+        stripe_id: price.id
       }
     })
+
+    if (!savedPlan) {
+      const planInterval = price.recurring?.interval
+      savedPlan = await strapi.query('plugin::stripe-payment.plan').create({
+        data: {
+          price: price.unit_amount / 100,
+          interval: planInterval,
+          stripe_id: price.id,
+          type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
+          product: savedProduct.id
+        }
+      })
+    }
 
     await strapi.query('plugin::stripe-payment.product').update({
       where: {
         id: savedProduct.id
       },
       data: {
-        plans: [...savedProduct.plans, savedPlan.id]
+        plans: [savedPlan.id]
       }
     })
   },
@@ -522,7 +554,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!product) {
-      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} not found`)
+      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} was not found`)
     }
 
     const isActive = event.data.object.active
@@ -590,7 +622,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })
 
     if (!product) {
-      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} not found`)
+      throw new createHttpError.NotFound(`Product with stripe id ${event.data.object.id} was not found`)
     }
 
     await this.deleteProduct(product)
