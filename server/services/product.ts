@@ -88,7 +88,9 @@ export default factories.createCoreService('plugin::stripe-payment.product', ({ 
       throw new createHttpError.BadRequest('You cannot delete a product with plans')
     }
 
-    await strapi.plugin('stripe-payment').service('stripe').products.del(product.stripe_id)
+    await strapi.plugin('stripe-payment').service('stripe').products.update(product.stripe_id, {
+      active: false
+    })
     await strapi.query('plugin::stripe-payment.product').delete({ where: { id } })
 
     return { id }
