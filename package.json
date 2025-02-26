@@ -1,6 +1,6 @@
 {
   "name": "@dbbs/strapi-stripe-payment",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Strapi integration plugin for Stripe payment system",
   "main": "dist/index.js",
   "strapi": {
@@ -10,8 +10,12 @@
     "kind": "plugin"
   },
   "files": [
+    "admin",
     "dist",
-    "README.md"
+    "server",
+    "docs",
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "Strapi",
