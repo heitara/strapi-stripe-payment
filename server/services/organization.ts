@@ -255,7 +255,7 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       })
     }
 
-    return user
+    return true
   },
 
   async removeUser(params: RemoveUserParams) {

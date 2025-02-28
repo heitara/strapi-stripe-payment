@@ -96,17 +96,16 @@ const OrganizationDetail: React.FC = () => {
   }
 
   const handleSaveUser = async () => {
-    const newUser = await request(`/stripe-payment/admin/organizations/${id}/users`, {
+    await request(`/stripe-payment/admin/organizations/${id}/users`, {
       method: 'PATCH',
       body: { recipientEmail: newUserEmail }
     })
 
-    setUsers([...users, newUser])
     setShowAddUserModal(false)
     setNewUserEmail('')
     toggleNotification({
       type: 'success',
-      message: 'User added successfully'
+      message: 'Invitation sent successfully'
     })
   }
 
