@@ -219,7 +219,7 @@ const OrganizationDetail: React.FC = () => {
     setShowDeleteOwnerWarning(false)
   }
 
-  const isOwner = (user: User) => Number(user.id) === Number(organization?.owner_id)
+  const isOwner = (user: User) => Number(user.id) === Number(ownerId)
 
   // TODO: #836 split components
   return (
