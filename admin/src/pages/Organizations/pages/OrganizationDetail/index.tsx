@@ -346,35 +346,37 @@ const OrganizationDetail: React.FC = () => {
           </Box>
         </Box>
       )}
-      <Box marginBottom={6}>
-        <Typography variant="beta" as="h2" marginBottom={4}>
-          Purchases
-        </Typography>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma">Product</Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">Price</Typography>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {purchases.map((purchase: Purchase) => (
-              <Tr key={purchase.id}>
-                <Td>
-                  <Typography textColor="neutral800">{purchase.plan.product.name}</Typography>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{purchase.plan.price}</Typography>
-                </Td>
+      {!!purchases.length && (
+        <Box marginBottom={6}>
+          <Typography variant="beta" as="h2" marginBottom={4}>
+            Purchases
+          </Typography>
+          <Table>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma">Product</Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">Price</Typography>
+                </Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {purchases.map((purchase: Purchase) => (
+                <Tr key={purchase.id}>
+                  <Td>
+                    <Typography textColor="neutral800">{purchase.plan.product.name}</Typography>
+                  </Td>
+                  <Td>
+                    <Typography textColor="neutral800">{purchase.plan.price}</Typography>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      )}
       <AddUserModal
         isOpen={showAddUserModal}
         onClose={handleCloseAddUserModal}
