@@ -128,7 +128,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           data: {
             name: organizationName,
             owner_id: userId,
-            users: [userId],
             quantity: parseInt(quantity, 10)
           }
         })
