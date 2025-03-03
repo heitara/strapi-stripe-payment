@@ -34,13 +34,17 @@ export default factories.createCoreService('plugin::stripe-payment.subscription'
     } else {
       const organizationById = await strapi.query('plugin::stripe-payment.organization').findOne({
         where: { id: organizationId },
-        populate: { users: true }
+        populate: { users: true, subscription: true }
       })
 
       if (!organizationById) {
         throw new createHttpError.NotFound(`Organization with id ${organizationId} not found`)
       }
-
+      if (organizationById.subscription && organizationById.subscription.status !== SubscriptionStatus.CANCELLED) {
+        throw new createHttpError.BadRequest(
+          `Cannot create a subscription for the organization '${organizationById.name}' as it already has an active subscription`
+        )
+      }
       if (quantity < organizationById.users.length) {
         throw new createHttpError.BadRequest(`Quantity cannot be less than the number of users in the organization`)
       }
