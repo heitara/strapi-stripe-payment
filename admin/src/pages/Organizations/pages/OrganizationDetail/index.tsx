@@ -167,6 +167,17 @@ const OrganizationDetail: React.FC = () => {
     }
   }
 
+  const handleResubscribe = async () => {
+    if (subscription) {
+      await request(`/stripe-payment/admin/subscriptions/${subscription.id}/resubscribe`, { method: 'PATCH' })
+      setSubscription((prev) => ({ ...prev, status: SubscriptionStatus.ACTIVE }) as Subscription)
+      toggleNotification({
+        type: 'success',
+        message: 'Resubscribed successfully'
+      })
+    }
+  }
+
   const handleSaveSubscription = async () => {
     if (subscription) {
       await request(`/stripe-payment/admin/subscriptions/${subscription.id}`, {
@@ -327,6 +338,9 @@ const OrganizationDetail: React.FC = () => {
               )}
               {subscription.status !== SubscriptionStatus.CANCELLED && (
                 <Button onClick={handleCancelSubscription}>Cancel Subscription</Button>
+              )}
+              {subscription.status === SubscriptionStatus.CANCELLED && (
+                <Button onClick={handleResubscribe}>Resubscribe</Button>
               )}
             </Flex>
           </Flex>
