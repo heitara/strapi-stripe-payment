@@ -54,7 +54,10 @@ export default factories.createCoreService('plugin::stripe-payment.subscription'
     })
 
     if (!plan) {
-      throw new Error('Plan not found')
+      throw new createHttpError.NotFound('Plan not found')
+    }
+    if (plan.type === PlanType.ONE_TIME) {
+      throw new createHttpError.BadRequest('Cannot create a checkout session for subscription with one_time plan')
     }
 
     const successUrl: string = strapi.config.get('server.stripe.successPaymentUrl')
