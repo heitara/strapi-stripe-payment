@@ -11,93 +11,39 @@ import {
   CreateSessionParams
 } from '../interfaces'
 import { PlanType, SubscriptionStatus } from '../enums'
+import { validateAndFetchCheckoutSessionDetails } from '../helpers'
 
 export default factories.createCoreService('plugin::stripe-payment.subscription', ({ strapi }: { strapi: Strapi }) => ({
   async createCheckoutSession(params: CreateCheckoutSessionParams) {
-    const { userId, planId, quantity, organizationId } = params
+    const { userId } = params
+    const { organizationName, customerId, plan } = await validateAndFetchCheckoutSessionDetails(strapi, params)
 
-    let organizationName: string
-    let customerId: string | undefined
-
-    if (params.organizationName) {
-      const organizationExisting = await strapi.query('plugin::stripe-payment.organization').count({
-        where: {
-          name: params.organizationName
-        }
-      })
-
-      if (organizationExisting) {
-        throw new createHttpError.BadRequest(`Organization with name ${params.organizationName} already exists`)
-      }
-
-      organizationName = params.organizationName
-    } else {
-      const organizationById = await strapi.query('plugin::stripe-payment.organization').findOne({
-        where: { id: organizationId },
-        populate: { users: true, subscription: true }
-      })
-
-      if (!organizationById) {
-        throw new createHttpError.NotFound(`Organization with id ${organizationId} not found`)
-      }
-      if (organizationById.subscription && organizationById.subscription.status !== SubscriptionStatus.CANCELLED) {
-        throw new createHttpError.BadRequest(
-          `Cannot create a subscription for the organization '${organizationById.name}' as it already has an active subscription`
-        )
-      }
-      if (quantity < organizationById.users.length) {
-        throw new createHttpError.BadRequest(`Quantity cannot be less than the number of users in the organization`)
-      }
-
-      customerId = organizationById.customer_id
-      organizationName = organizationById.name
+    if (plan.type !== PlanType.RECURRING) {
+      throw new createHttpError.BadRequest('Cannot create a subscription checkout session for a one-time plan')
     }
 
-    const plan = await strapi.query('plugin::stripe-payment.plan').findOne({
-      where: { id: planId }
+    const organizationByName = await strapi.query('plugin::stripe-payment.organization').findOne({
+      where: { name: organizationName },
+      populate: { subscription: true }
     })
 
-    if (!plan) {
-      throw new createHttpError.NotFound('Plan not found')
+    if (organizationByName?.subscription && organizationByName.subscription.status !== SubscriptionStatus.CANCELLED) {
+      throw new createHttpError.BadRequest(
+        `Cannot create a subscription for the organization '${organizationByName.name}' as it already has an active subscription`
+      )
     }
 
     const successUrl: string = strapi.config.get('server.stripe.successPaymentUrl')
-
-    const stripeQuantity = plan.type === PlanType.RECURRING ? quantity : 1
-    let sessionParams: CreateSessionParams = {
+    const sessionParams: CreateSessionParams = {
       success_url: successUrl,
-      metadata: { organizationName, userId, planId, quantity },
-      line_items: [
-        {
-          price: plan.stripe_id,
-          quantity: stripeQuantity
-        }
-      ]
-    }
-    if (customerId) {
-      sessionParams = {
-        ...sessionParams,
-        customer: customerId
-      }
-    }
-
-    if (plan.type === PlanType.RECURRING) {
-      sessionParams = {
-        ...sessionParams,
-        subscription_data: {
-          trial_period_days: 30
-        },
-        mode: 'subscription'
-      }
-    } else {
-      sessionParams = {
-        ...sessionParams,
-        mode: 'payment'
-      }
+      metadata: { organizationName, userId, planId: plan.id, quantity: params.quantity },
+      line_items: [{ price: plan.stripe_id, quantity: params.quantity }],
+      subscription_data: { trial_period_days: 30 },
+      mode: 'subscription',
+      ...(customerId && { customer: customerId })
     }
 
     const session = await strapi.plugin('stripe-payment').service('stripe').checkout.sessions.create(sessionParams)
-
     return session.url
   },
 

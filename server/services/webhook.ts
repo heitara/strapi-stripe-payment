@@ -169,8 +169,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           }
         })
 
-        console.log(purchase)
-
         await strapi.query('plugin::stripe-payment.organization').update({
           where: { id: organization.id },
           data: {

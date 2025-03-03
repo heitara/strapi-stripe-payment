@@ -90,6 +90,23 @@ export const strapiOrganizationServiceMock = {
   }
 }
 
+export const strapiPurchaseServiceMock = {
+  plugin: jest.fn().mockReturnValue({
+    service: jest.fn().mockReturnValue({
+      checkout: {
+        sessions: {
+          create: jest.fn().mockResolvedValue({ url: 'https://checkout.session.url' })
+        }
+      }
+    })
+  }),
+  config: {
+    get: jest.fn().mockReturnValue('https://success.url'),
+    set: jest.fn(),
+    has: jest.fn()
+  }
+}
+
 export const strapiSubscriptionServiceMock = {
   plugin: jest.fn().mockReturnValue({
     service: jest.fn().mockReturnValue({
