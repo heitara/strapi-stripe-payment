@@ -27,17 +27,26 @@ export default factories.createCoreService('plugin::stripe-payment.subscription'
       })
 
       if (organizationExisting) {
-        throw new createHttpError.Forbidden(`Organization with name ${params.organizationName} already exists`)
+        throw new createHttpError.BadRequest(`Organization with name ${params.organizationName} already exists`)
       }
 
       organizationName = params.organizationName
     } else {
       const organizationById = await strapi.query('plugin::stripe-payment.organization').findOne({
-        where: { id: organizationId }
+        where: { id: organizationId },
+        populate: { users: true, subscription: true }
       })
 
       if (!organizationById) {
         throw new createHttpError.NotFound(`Organization with id ${organizationId} not found`)
+      }
+      if (organizationById.subscription && organizationById.subscription.status !== SubscriptionStatus.CANCELLED) {
+        throw new createHttpError.BadRequest(
+          `Cannot create a subscription for the organization '${organizationById.name}' as it already has an active subscription`
+        )
+      }
+      if (quantity < organizationById.users.length) {
+        throw new createHttpError.BadRequest(`Quantity cannot be less than the number of users in the organization`)
       }
 
       customerId = organizationById.customer_id
@@ -49,7 +58,10 @@ export default factories.createCoreService('plugin::stripe-payment.subscription'
     })
 
     if (!plan) {
-      throw new Error('Plan not found')
+      throw new createHttpError.NotFound('Plan not found')
+    }
+    if (plan.type === PlanType.ONE_TIME) {
+      throw new createHttpError.BadRequest('Cannot create a checkout session for subscription with one_time plan')
     }
 
     const successUrl: string = strapi.config.get('server.stripe.successPaymentUrl')

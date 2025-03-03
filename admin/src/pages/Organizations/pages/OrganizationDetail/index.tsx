@@ -96,17 +96,16 @@ const OrganizationDetail: React.FC = () => {
   }
 
   const handleSaveUser = async () => {
-    const newUser = await request(`/stripe-payment/admin/organizations/${id}/users`, {
+    await request(`/stripe-payment/admin/organizations/${id}/users`, {
       method: 'PATCH',
       body: { recipientEmail: newUserEmail }
     })
 
-    setUsers([...users, newUser])
     setShowAddUserModal(false)
     setNewUserEmail('')
     toggleNotification({
       type: 'success',
-      message: 'User added successfully'
+      message: 'Invitation sent successfully'
     })
   }
 
@@ -168,6 +167,17 @@ const OrganizationDetail: React.FC = () => {
     }
   }
 
+  const handleResubscribe = async () => {
+    if (subscription) {
+      await request(`/stripe-payment/admin/subscriptions/${subscription.id}/resubscribe`, { method: 'PATCH' })
+      setSubscription((prev) => ({ ...prev, status: SubscriptionStatus.ACTIVE }) as Subscription)
+      toggleNotification({
+        type: 'success',
+        message: 'Resubscribed successfully'
+      })
+    }
+  }
+
   const handleSaveSubscription = async () => {
     if (subscription) {
       await request(`/stripe-payment/admin/subscriptions/${subscription.id}`, {
@@ -220,7 +230,7 @@ const OrganizationDetail: React.FC = () => {
     setShowDeleteOwnerWarning(false)
   }
 
-  const isOwner = (user: User) => Number(user.id) === Number(organization?.owner_id)
+  const isOwner = (user: User) => Number(user.id) === Number(ownerId)
 
   // TODO: #836 split components
   return (
@@ -329,6 +339,9 @@ const OrganizationDetail: React.FC = () => {
               {subscription.status !== SubscriptionStatus.CANCELLED && (
                 <Button onClick={handleCancelSubscription}>Cancel Subscription</Button>
               )}
+              {subscription.status === SubscriptionStatus.CANCELLED && (
+                <Button onClick={handleResubscribe}>Resubscribe</Button>
+              )}
             </Flex>
           </Flex>
           <Box marginTop={4}>
@@ -346,35 +359,37 @@ const OrganizationDetail: React.FC = () => {
           </Box>
         </Box>
       )}
-      <Box marginBottom={6}>
-        <Typography variant="beta" as="h2" marginBottom={4}>
-          Purchases
-        </Typography>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma">Product</Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma">Price</Typography>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {purchases.map((purchase: Purchase) => (
-              <Tr key={purchase.id}>
-                <Td>
-                  <Typography textColor="neutral800">{purchase.plan.product.name}</Typography>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{purchase.plan.price}</Typography>
-                </Td>
+      {!!purchases.length && (
+        <Box marginBottom={6}>
+          <Typography variant="beta" as="h2" marginBottom={4}>
+            Purchases
+          </Typography>
+          <Table>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma">Product</Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">Price</Typography>
+                </Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {purchases.map((purchase: Purchase) => (
+                <Tr key={purchase.id}>
+                  <Td>
+                    <Typography textColor="neutral800">{purchase.plan.product.name}</Typography>
+                  </Td>
+                  <Td>
+                    <Typography textColor="neutral800">{purchase.plan.price}</Typography>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      )}
       <AddUserModal
         isOpen={showAddUserModal}
         onClose={handleCloseAddUserModal}
