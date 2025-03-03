@@ -19,7 +19,7 @@ describe('Subscription Service', () => {
     })
     it.each([
       {
-        name: 'should create a checkout session',
+        name: 'should create a checkout session for a new organization',
         serviceMethodArgs: {
           organizationName: 'Test Organization',
           userId: 1,
@@ -59,7 +59,7 @@ describe('Subscription Service', () => {
         queryArgs: { where: { id: 1 } }
       },
       {
-        name: 'should create a checkout session',
+        name: 'should create a checkout session for an existing organization',
         serviceMethodArgs: {
           userId: 1,
           planId: 1,
@@ -75,7 +75,7 @@ describe('Subscription Service', () => {
           })
           jest
             .spyOn(strapi.query('plugin::stripe-payment.organization'), 'findOne')
-            .mockResolvedValue({ name: 'Test Organization', customer_id: 11 })
+            .mockResolvedValue({ name: 'Test Organization', customer_id: 11, users: [] })
           jest.spyOn(strapi.plugin('stripe-payment').service('stripe').checkout.sessions, 'create').mockResolvedValue({
             url: 'https://checkout.session.url'
           })
@@ -165,7 +165,7 @@ describe('Subscription Service', () => {
           jest.spyOn(strapi.query('plugin::stripe-payment.subscription'), 'findOne').mockResolvedValue(null)
         },
         queryMethod: 'findOne',
-        queryArgs: { where: { id: 1 }, populate: { organization: true, plan: true } },
+        queryArgs: { where: { id: 1 }, populate: { organization: true, plan: true } }
       }
     ])('$name', async ({ serviceMethodArgs, expectedResult, setupMocks, queryMethod, queryArgs }) => {
       setupMocks()
@@ -343,7 +343,7 @@ describe('Subscription Service', () => {
         expectedResult: null,
         setupMocks: () => {
           jest.spyOn(strapi.query('plugin::stripe-payment.subscription'), 'findOne').mockResolvedValue(null)
-        },
+        }
       }
     ])('$name', async ({ serviceMethodArgs, expectedResult, setupMocks }) => {
       setupMocks()
@@ -412,7 +412,7 @@ describe('Subscription Service', () => {
         expectedResult: null,
         setupMocks: () => {
           jest.spyOn(strapi.query('plugin::stripe-payment.subscription'), 'findOne').mockResolvedValue(null)
-        },
+        }
       }
     ])('$name', async ({ serviceMethodArgs, expectedResult, setupMocks }) => {
       setupMocks()
