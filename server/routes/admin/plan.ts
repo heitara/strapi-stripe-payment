@@ -22,5 +22,11 @@ export default [
     path: '/admin/plans/:id',
     handler: 'plan.delete',
     config: {}
+  },
+  {
+    method: 'GET',
+    path: '/admin/plans/currencies',
+    handler: 'plan.getCurrencies',
+    config: {}
   }
 ]

@@ -21,6 +21,7 @@ export interface CreatePlanRequestParams {
   type: string
   productId: string
   interval?: string
+  currency: string
 }
 
 export interface Product {

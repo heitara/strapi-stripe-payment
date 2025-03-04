@@ -5,13 +5,11 @@
 import createHttpError from 'http-errors'
 import { factories, Strapi } from '@strapi/strapi'
 import { CreatePlanParams, CreateStripePriceParams, DeletePlanParams, GetPlanByIdParams } from '../interfaces'
-import { PlanType } from '../enums'
+import { PlanType, SupportedCurrency } from '../enums'
 
 export default factories.createCoreService('plugin::stripe-payment.plan', ({ strapi }: { strapi: Strapi }) => ({
   async create(params: CreatePlanParams) {
-    const { price, interval, productId, type } = params
-
-    const stripeCurrency: string = strapi.config.get('server.stripe.currency')
+    const { price, interval, productId, type, currency } = params
 
     const product = await strapi.query('plugin::stripe-payment.product').findOne({
       where: { id: productId },
@@ -25,9 +23,9 @@ export default factories.createCoreService('plugin::stripe-payment.plan', ({ str
     }
 
     const planData: CreateStripePriceParams = {
-      currency: stripeCurrency,
+      currency,
       product: product.stripe_id,
-      unit_amount: price * 100 // in cents
+      unit_amount: price * 100
     }
 
     if (type === PlanType.RECURRING) {
@@ -92,5 +90,11 @@ export default factories.createCoreService('plugin::stripe-payment.plan', ({ str
     await strapi.query('plugin::stripe-payment.plan').delete({ where: { id } })
 
     return { id }
+  },
+
+  async getUniqueCurrencies() {
+    const currencies = Object.values(SupportedCurrency)
+
+    return currencies
   }
 }))

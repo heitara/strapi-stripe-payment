@@ -16,6 +16,9 @@ interface AddPlanModalProps {
   setPlanInterval: (interval: BillingPeriod) => void
   planType: string
   setPlanType: (type: PlanType) => void
+  planCurrency: string
+  setPlanCurrency: (currency: string) => void
+  currencies
   onSave: () => void
   priceError: string | null
   planError: string | null
@@ -30,6 +33,9 @@ const AddPlanModal: React.FC<AddPlanModalProps> = ({
   setPlanInterval,
   planType,
   setPlanType,
+  planCurrency,
+  setPlanCurrency,
+  currencies,
   onSave,
   priceError,
   planError
@@ -71,6 +77,13 @@ const AddPlanModal: React.FC<AddPlanModalProps> = ({
             <Option value="year">Year</Option>
           </Select>
         )}
+        <Select label="Currency" name="planCurrency" value={planCurrency} onChange={setPlanCurrency}>
+          {currencies.map((currency) => (
+            <Option key={currency} value={currency}>
+              {currency.toUpperCase()}
+            </Option>
+          ))}
+        </Select>
         {planError && (
           <Typography variant="pi" textColor="danger600">
             {planError}
