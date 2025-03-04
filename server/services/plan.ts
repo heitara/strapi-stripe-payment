@@ -40,7 +40,8 @@ export default factories.createCoreService('plugin::stripe-payment.plan', ({ str
         interval,
         type,
         stripe_id: plan.id,
-        product: product.id
+        product: product.id,
+        currency
       }
     })
 
