@@ -31,7 +31,8 @@
     "test": "jest",
     "clean": "npx rimraf node_modules dist || exit 0",
     "lint": "npx eslint . --ext ts,tsx --max-warnings 0 --fix",
-    "check-types": "npx tsc -p ./tsconfig.json --pretty --noEmit"
+    "check-types": "npx tsc -p ./tsconfig.json --pretty --noEmit",
+    "prepare": "node .husky/install.mjs"
   },
   "author": "DBB Software",
   "license": "MIT",
@@ -88,7 +89,8 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.11",
     "ts-jest": "29.2.4",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "husky": "9.1.6"
   },
   "peerDependencies": {
     "@strapi/strapi": "4.25.8",
