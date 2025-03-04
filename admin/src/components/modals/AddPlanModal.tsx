@@ -18,7 +18,7 @@ interface AddPlanModalProps {
   setPlanType: (type: PlanType) => void
   planCurrency: string
   setPlanCurrency: (currency: string) => void
-  currencies
+  currencies: string[]
   onSave: () => void
   priceError: string | null
   planError: string | null
@@ -78,11 +78,12 @@ const AddPlanModal: React.FC<AddPlanModalProps> = ({
           </Select>
         )}
         <Select label="Currency" name="planCurrency" value={planCurrency} onChange={setPlanCurrency}>
-          {currencies.map((currency) => (
-            <Option key={currency} value={currency}>
-              {currency.toUpperCase()}
-            </Option>
-          ))}
+          {currencies &&
+            currencies.map((currency: string) => (
+              <Option key={currency} value={currency}>
+                {currency.toUpperCase()}
+              </Option>
+            ))}
         </Select>
         {planError && (
           <Typography variant="pi" textColor="danger600">
