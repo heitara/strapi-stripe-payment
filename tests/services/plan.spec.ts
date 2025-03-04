@@ -48,7 +48,8 @@ describe('Plan Service', () => {
             interval: 'month',
             stripe_id: 1,
             product: 1,
-            type: PlanType.RECURRING
+            type: PlanType.RECURRING,
+            currency: SupportedCurrency.usd
           }
         }
       }
