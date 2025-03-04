@@ -212,7 +212,7 @@ const ProductDetail: React.FC = () => {
                   <Typography textColor="neutral800">{plan.type}</Typography>
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{plan.currency}</Typography>
+                  <Typography textColor="neutral800">{plan.currency.toUpperCase()}</Typography>
                 </Td>
                 <Td>
                   <IconButton
