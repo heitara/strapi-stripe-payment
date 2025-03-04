@@ -192,6 +192,9 @@ const ProductDetail: React.FC = () => {
                 <Typography variant="sigma">Type</Typography>
               </Th>
               <Th>
+                <Typography variant="sigma">Currency</Typography>
+              </Th>
+              <Th>
                 <Typography variant="sigma">Actions</Typography>
               </Th>
             </Tr>
@@ -207,6 +210,9 @@ const ProductDetail: React.FC = () => {
                 </Td>
                 <Td>
                   <Typography textColor="neutral800">{plan.type}</Typography>
+                </Td>
+                <Td>
+                  <Typography textColor="neutral800">{plan.currency}</Typography>
                 </Td>
                 <Td>
                   <IconButton

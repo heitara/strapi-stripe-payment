@@ -14,6 +14,7 @@ export interface Plan {
   interval: BillingPeriod
   type: PlanType
   product: Product
+  currency: string
 }
 
 export interface CreatePlanRequestParams {
