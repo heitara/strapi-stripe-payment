@@ -3,5 +3,6 @@ export const defaultPlan = {
   price: 1000,
   interval: 'month',
   productId: 1,
-  stripe_id: 'plan_123'
+  stripe_id: 'plan_123',
+  currency: 'usd'
 }
