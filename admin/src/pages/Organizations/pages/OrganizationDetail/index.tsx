@@ -393,9 +393,10 @@ const OrganizationDetail: React.FC = () => {
       <AddUserModal
         isOpen={showAddUserModal}
         onClose={handleCloseAddUserModal}
-        userEmail={newUserEmail}
-        setUserEmail={setNewUserEmail}
+        selectedUserEmail={newUserEmail}
+        setSelectedUserEmail={setNewUserEmail}
         onSave={handleSaveUser}
+        existingUsers={users}
       />
       <DeleteConfirmModal isOpen={showDeleteConfirm} onClose={handleCloseDeleteConfirm} onConfirm={handleDeleteUser} />
       {showChangeOwnerConfirm && (
