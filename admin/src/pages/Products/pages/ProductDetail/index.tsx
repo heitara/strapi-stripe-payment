@@ -23,6 +23,8 @@ const ProductDetail: React.FC = () => {
   const [name, setName] = useState('')
   const [plans, setPlans] = useState<Plan[]>([])
   const [showAddPlanModal, setShowAddPlanModal] = useState(false)
+  const [currencies, setCurrencies] = useState<string[]>([])
+  const [newPlanCurrency, setNewPlanCurrency] = useState<string>('usd')
   const [newPlanPrice, setNewPlanPrice] = useState('')
   const [newPlanInterval, setNewPlanInterval] = useState(BillingPeriod.MONTH)
   const [newPlanType, setNewPlanType] = useState(PlanType.RECURRING)
@@ -39,7 +41,13 @@ const ProductDetail: React.FC = () => {
       setPlans(productData.plans || [])
     }
 
+    const fetchCurrencies = async () => {
+      const currencyData = await request('/stripe-payment/admin/plans/currencies', { method: 'GET' })
+      setCurrencies(currencyData)
+    }
+
     fetchProduct()
+    fetchCurrencies()
   }, [id])
 
   const handleSaveProduct = async () => {
@@ -87,7 +95,8 @@ const ProductDetail: React.FC = () => {
     const requestBody: CreatePlanRequestParams = {
       price: newPlanPrice,
       type: newPlanType,
-      productId: id
+      productId: id,
+      currency: newPlanCurrency
     }
 
     if (newPlanType === PlanType.RECURRING) {
@@ -104,6 +113,7 @@ const ProductDetail: React.FC = () => {
     setNewPlanPrice('')
     setNewPlanInterval(BillingPeriod.MONTH)
     setNewPlanType(PlanType.RECURRING)
+    setNewPlanCurrency('usd')
     toggleNotification({
       type: 'success',
       message: 'Plan added successfully'
@@ -182,6 +192,9 @@ const ProductDetail: React.FC = () => {
                 <Typography variant="sigma">Type</Typography>
               </Th>
               <Th>
+                <Typography variant="sigma">Currency</Typography>
+              </Th>
+              <Th>
                 <Typography variant="sigma">Actions</Typography>
               </Th>
             </Tr>
@@ -197,6 +210,9 @@ const ProductDetail: React.FC = () => {
                 </Td>
                 <Td>
                   <Typography textColor="neutral800">{plan.type}</Typography>
+                </Td>
+                <Td>
+                  <Typography textColor="neutral800">{plan.currency.toUpperCase()}</Typography>
                 </Td>
                 <Td>
                   <IconButton
@@ -221,6 +237,9 @@ const ProductDetail: React.FC = () => {
         setPlanInterval={setNewPlanInterval}
         planType={newPlanType}
         setPlanType={setNewPlanType}
+        planCurrency={newPlanCurrency}
+        setPlanCurrency={setNewPlanCurrency}
+        currencies={currencies}
         onSave={handleSavePlan}
         priceError={priceError}
         planError={planError}

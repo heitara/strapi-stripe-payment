@@ -6,13 +6,14 @@ import { validateWithYupSchema } from '../helpers'
 
 export default factories.createCoreController('plugin::stripe-payment.plan', ({ strapi }: { strapi: Strapi }) => ({
   async create(ctx) {
-    const { price, interval, productId, type } = ctx.request.body as CreatePlanParams
+    const { price, interval, productId, type, currency } = ctx.request.body as CreatePlanParams
 
     const validatedParams = await validateWithYupSchema(createPlanSchema, {
       price,
       interval,
       productId,
-      type
+      type,
+      currency
     })
 
     const plan = await strapi.plugin('stripe-payment').service('plan').create(validatedParams)
@@ -50,5 +51,11 @@ export default factories.createCoreController('plugin::stripe-payment.plan', ({ 
     }
 
     ctx.send(result)
+  },
+
+  async getCurrencies(ctx) {
+    const currencies = await strapi.plugin('stripe-payment').service('plan').getUniqueCurrencies()
+
+    ctx.send(currencies)
   }
 }))

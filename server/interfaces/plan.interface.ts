@@ -1,9 +1,10 @@
-import { BillingPeriod, PlanType } from '../enums'
+import { BillingPeriod, PlanType, SupportedCurrency } from '../enums'
 
 export interface CreatePlanParams {
   price: number
   interval: BillingPeriod
   productId: number
+  currency: SupportedCurrency
   type: PlanType
 }
 
@@ -19,6 +20,7 @@ export interface Plan {
   price: number
   interval: BillingPeriod
   stripe_id: string
+  currency: SupportedCurrency
   product: {
     name: string
     id: number
@@ -27,7 +29,7 @@ export interface Plan {
 }
 
 export interface CreateStripePriceParams {
-  currency: string
+  currency: SupportedCurrency
   product: string
   unit_amount: number
   recurring?: {

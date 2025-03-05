@@ -1,7 +1,7 @@
 import { Strapi } from '@strapi/strapi'
 import planService from '../../server/services/plan'
 import { createMockStrapi } from '../factories'
-import { BillingPeriod, PlanType } from '../../server/enums'
+import { BillingPeriod, PlanType, SupportedCurrency } from '../../server/enums'
 import { defaultPlan, strapiPlanServiceMock } from '../mocks'
 
 jest.mock('stripe')
@@ -17,7 +17,13 @@ describe('Plan Service', () => {
     it.each([
       {
         name: 'should create a plan',
-        serviceMethodArgs: { price: 1000, interval: BillingPeriod.MONTH, productId: 1, type: PlanType.RECURRING },
+        serviceMethodArgs: {
+          price: 1000,
+          interval: BillingPeriod.MONTH,
+          productId: 1,
+          type: PlanType.RECURRING,
+          currency: SupportedCurrency.usd
+        },
         expectedResult: defaultPlan,
         setupMocks: () => {
           jest
@@ -42,7 +48,8 @@ describe('Plan Service', () => {
             interval: 'month',
             stripe_id: 1,
             product: 1,
-            type: PlanType.RECURRING
+            type: PlanType.RECURRING,
+            currency: SupportedCurrency.usd
           }
         }
       }

@@ -32,6 +32,9 @@
       ],
       "default": "recurring"
     },
+    "currency": {
+      "type": "string"
+    },
     "product": {
       "type": "relation",
       "relation": "manyToOne",

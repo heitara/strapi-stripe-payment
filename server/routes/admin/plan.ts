@@ -7,6 +7,12 @@ export default [
   },
   {
     method: 'GET',
+    path: '/admin/plans/currencies',
+    handler: 'plan.getCurrencies',
+    config: {}
+  },
+  {
+    method: 'GET',
     path: '/admin/plans/:id',
     handler: 'plan.getPlanById',
     config: {}

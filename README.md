@@ -50,7 +50,6 @@ STRIPE_SUCCESS_SETUP_URL=your_success_setup_url
 export default ({ env }) => ({
   stripe: {
     apiKey: env('STRIPE_API_KEY', ''),
-    currency: 'usd',
     successPaymentUrl: env('STRIPE_SUCCESS_PAYMENT_URL', 'http://localhost:8080/success'),
     successSetupUrl: env('STRIPE_SUCCESS_SETUP_URL', 'http://localhost:8080/success'),
     webhookSecret: env('STRIPE_WEBHOOK_SECRET', ''),
