@@ -207,10 +207,6 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       return null
     }
 
-    if (organization.quantity <= organization.users.length + 1) {
-      throw new createHttpError.BadRequest('Run out of available places in your organization, add new seats')
-    }
-
     const user = await strapi.query('plugin::users-permissions.user').findOne({ where: { email: recipientEmail } })
 
     if (!user) {
@@ -219,6 +215,10 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
 
     if (organization.users.some(({ id }) => id === user.id)) {
       throw new createHttpError.BadRequest('User already exists in organization!')
+    }
+
+    if (organization.quantity <= organization.users.length + 1) {
+      throw new createHttpError.BadRequest('Run out of available places in your organization, add new seats')
     }
 
     const stripeSubscription = await strapi
@@ -247,7 +247,7 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       }
     })
 
-    return true
+    return user
   },
 
   async removeUser(params: RemoveUserParams) {
