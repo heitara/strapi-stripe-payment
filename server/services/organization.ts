@@ -31,7 +31,7 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       email
     })
 
-    const organization = await strapi.query('plugin::stripe-payment.organization').create({
+    return strapi.query('plugin::stripe-payment.organization').create({
       data: {
         name,
         customer_id: customer.id,
@@ -40,8 +40,6 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
         quantity
       }
     })
-
-    return organization
   },
 
   async getOrganizationById(params: GetOrganizationByIdParams) {
@@ -62,7 +60,7 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
   async getUserOrganizations(params: GetMyOrganizationsParams) {
     const { userId } = params
 
-    const organizations = await strapi.query('plugin::stripe-payment.organization').findMany({
+    return strapi.query('plugin::stripe-payment.organization').findMany({
       where: {
         users: {
           id: userId
@@ -70,16 +68,12 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       },
       populate: ['users']
     })
-
-    return organizations
   },
 
   async getAllOrganizations() {
-    const organizations = await strapi.query('plugin::stripe-payment.organization').findMany({
+    return strapi.query('plugin::stripe-payment.organization').findMany({
       populate: ['users']
     })
-
-    return organizations
   },
 
   async update(params: UpdateOrganizationParams) {
@@ -205,10 +199,7 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
     const organization = await strapi.query('plugin::stripe-payment.organization').findOne({
       where: { id: organizationId },
       populate: {
-        users: true,
-        invites: {
-          where: { status: InviteStatus.PENDING }
-        }
+        users: true
       }
     })
 
@@ -216,46 +207,49 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       return null
     }
 
-    if (organization.quantity <= organization.users.length + organization.invites.length) {
+    const user = await strapi.query('plugin::users-permissions.user').findOne({ where: { email: recipientEmail } })
+
+    if (!user) {
+      throw new createHttpError.NotFound(`User with email ${recipientEmail} not found`)
+    }
+
+    if (organization.users.some(({ id }) => id === user.id)) {
+      throw new createHttpError.BadRequest('User already exists in organization!')
+    }
+
+    if (organization.quantity <= organization.users.length + 1) {
       throw new createHttpError.BadRequest('Run out of available places in your organization, add new seats')
     }
 
-    const user = await strapi.query('plugin::users-permissions.user').findOne({ where: { email: recipientEmail } })
+    if (organization.subscription) {
+      const stripeSubscription = await strapi
+        .plugin('stripe-payment')
+        .service('stripe')
+        .subscriptions.retrieve(organization.subscription.stripe_id)
 
-    const generatedInviteToken = crypto.randomUUID()
-
-    const invite = await strapi.query('plugin::stripe-payment.invite').findOne({
-      where: {
-        email: recipientEmail,
-        organization: organizationId,
-        $or: [{ status: InviteStatus.PENDING }, { status: InviteStatus.ACCEPTED }]
+      if (stripeSubscription.items.data[0].quantity <= organization.users.length) {
+        await strapi
+          .plugin('stripe-payment')
+          .service('stripe')
+          .subscriptions.update(organization.subscription.stripe_id, {
+            items: [
+              {
+                id: stripeSubscription.items.data[0].id,
+                quantity: organization.users.length + 1
+              }
+            ]
+          })
       }
-    })
-
-    if (invite) {
-      throw new createHttpError.BadRequest(`An invitation to ${organization.name} has already been sent to this email!`)
     }
 
-    await strapi.query('plugin::stripe-payment.invite').create({
+    await strapi.query('plugin::stripe-payment.organization').update({
+      where: { id: organizationId },
       data: {
-        token: generatedInviteToken,
-        status: InviteStatus.PENDING,
-        organization: organization.id,
-        user: user?.id || undefined,
-        email: recipientEmail
+        users: organization.users ? [...organization.users, user] : [user]
       }
     })
 
-    if (!user) {
-      return this.sendOrganizationInviteEmail({
-        organizationName: organization.name,
-        organizationId: organization.id,
-        recipientEmail,
-        inviteToken: generatedInviteToken
-      })
-    }
-
-    return true
+    return user
   },
 
   async removeUser(params: RemoveUserParams) {

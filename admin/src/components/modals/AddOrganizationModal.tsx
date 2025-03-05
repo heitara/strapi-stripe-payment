@@ -32,6 +32,7 @@ const AddOrganizationModal: React.FC<AddOrganizationModalProps> = ({
   onSave
 }) => {
   const [users, setUsers] = useState<{ id: string; username: string; email: string }[]>([])
+  const [quantityError, setQuantityError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -53,7 +54,14 @@ const AddOrganizationModal: React.FC<AddOrganizationModalProps> = ({
   }
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuantity(Number(e.target.value))
+    const value = Number(e.target.value)
+
+    if (value < 0) {
+      setQuantityError('Quantity cannot be negative')
+    } else {
+      setQuantityError(null)
+      setQuantity(value)
+    }
   }
 
   const handleOwnerChange = (value: string) => {
@@ -67,6 +75,7 @@ const AddOrganizationModal: React.FC<AddOrganizationModalProps> = ({
   }
 
   const handleSave = () => {
+    if (quantityError) return
     onSave()
   }
 
@@ -86,7 +95,14 @@ const AddOrganizationModal: React.FC<AddOrganizationModalProps> = ({
           value={organizationName}
           onChange={handleOrganizationNameChange}
         />
-        <TextInput label="Quantity" name="quantity" type="number" value={quantity} onChange={handleQuantityChange} />
+        <TextInput
+          label="Quantity"
+          name="quantity"
+          type="number"
+          value={quantity}
+          onChange={handleQuantityChange}
+          error={quantityError}
+        />
         <Select label="Owner" name="ownerId" value={ownerId} onChange={handleOwnerChange}>
           {users.map((user) => (
             <Option key={user.id} value={user.id}>
@@ -101,7 +117,11 @@ const AddOrganizationModal: React.FC<AddOrganizationModalProps> = ({
             Cancel
           </Button>
         }
-        endActions={<Button onClick={handleSave}>Save</Button>}
+        endActions={
+          <Button onClick={handleSave} disabled={!!quantityError}>
+            Save
+          </Button>
+        }
       />
     </ModalLayout>
   )
