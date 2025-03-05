@@ -221,23 +221,25 @@ export default factories.createCoreService('plugin::stripe-payment.organization'
       throw new createHttpError.BadRequest('Run out of available places in your organization, add new seats')
     }
 
-    const stripeSubscription = await strapi
-      .plugin('stripe-payment')
-      .service('stripe')
-      .subscriptions.retrieve(organization.subscription.stripe_id)
-
-    if (stripeSubscription.items.data[0].quantity <= organization.users.length) {
-      await strapi
+    if (organization.subscription) {
+      const stripeSubscription = await strapi
         .plugin('stripe-payment')
         .service('stripe')
-        .subscriptions.update(organization.subscription.stripe_id, {
-          items: [
-            {
-              id: stripeSubscription.items.data[0].id,
-              quantity: organization.users.length + 1
-            }
-          ]
-        })
+        .subscriptions.retrieve(organization.subscription.stripe_id)
+
+      if (stripeSubscription.items.data[0].quantity <= organization.users.length) {
+        await strapi
+          .plugin('stripe-payment')
+          .service('stripe')
+          .subscriptions.update(organization.subscription.stripe_id, {
+            items: [
+              {
+                id: stripeSubscription.items.data[0].id,
+                quantity: organization.users.length + 1
+              }
+            ]
+          })
+      }
     }
 
     await strapi.query('plugin::stripe-payment.organization').update({
