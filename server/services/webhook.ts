@@ -122,15 +122,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
             quantity: parseInt(quantity, 10)
           }
         })
-      } else {
-        organization = await strapi.query('plugin::stripe-payment.organization').update({
-          where: { id: organization.id },
-          data: {
-            name: organizationName,
-            owner_id: userId,
-            quantity: parseInt(quantity, 10)
-          }
-        })
       }
 
       if (isSubscription) {
@@ -405,6 +396,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         price: (event.data.object.unit_amount as number) / 100,
         interval: planInterval || null,
         stripe_id: event.data.object.id,
+        currency: event.data.object.currency,
         type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
         product: product.id
       }
@@ -455,6 +447,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         price: (event.data.object.unit_amount as number) / 100,
         interval: planInterval,
         stripe_id: event.data.object.id,
+        currency: event.data.object.currency,
         type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
         product: product.id
       }
@@ -508,6 +501,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           price: price.unit_amount / 100,
           interval: planInterval,
           stripe_id: price.id,
+          currency: price.currency,
           type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
           product: savedProduct.id
         }
@@ -575,6 +569,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           price: price.unit_amount / 100,
           interval: planInterval,
           stripe_id: price.id,
+          currency: price.currency,
           type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
           product: product.id
         })

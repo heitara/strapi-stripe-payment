@@ -35,6 +35,11 @@ export async function validateAndFetchCheckoutSessionDetails(
     if (quantity < organizationById.users.length) {
       throw new createHttpError.BadRequest('Quantity cannot be less than the number of users in the organization')
     }
+    if (quantity > organizationById.quantity) {
+      throw new createHttpError.BadRequest(
+        "Quantity exceeds the organization's limit. Please increase the number of seats first."
+      )
+    }
 
     customerId = organizationById.customer_id
     organizationName = organizationById.name
