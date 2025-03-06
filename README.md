@@ -38,8 +38,6 @@ Configure the required environment variables in your `.env` file:
 ```env
 STRIPE_API_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=webhook_secrete_key
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_VERIFIED_EMAIL=your_configured_email
 STRIPE_SUCCESS_PAYMENT_URL=your_success_url
 STRIPE_SUCCESS_SETUP_URL=your_success_setup_url
 ```
@@ -54,11 +52,7 @@ export default ({ env }) => ({
     successSetupUrl: env('STRIPE_SUCCESS_SETUP_URL', 'http://localhost:8080/success'),
     webhookSecret: env('STRIPE_WEBHOOK_SECRET', ''),
     domainUrl: env('DOMAIN_URL', '')
-  },
-  sendgrid: {
-    apiKey: env('SENDGRID_API_KEY'),
-    verifiedEmail: env('SENDGRID_VERIFIED_EMAIL')
-  },
+  }
 })
 ```
 
@@ -87,19 +81,6 @@ To use this plugin, you need to have two services set up:
 
 4. Copy the **Webhook Secret Key** and add it to your `.env` file.
 
-### SendGrid (Email Service)
-
-1. Go to [SendGrid](https://sendgrid.com/) and log in/register an account.
-    - Receive your `SENDGRID_API_KEY` ([here](https://app.sendgrid.com/guide/integrate/langs/nodejs) is an
-      official guide on how to get it)
-    - ![Sendgrid api key](./docs/images/sendgrid_api_key.png)
-2. Add `verified email` to envs, to verify email you should
-   visit [settings](https://app.sendgrid.com/settings/sender_auth).
-    - You need to click verify single sender, and sendgrid redirects you to
-      this [page](https://app.sendgrid.com/settings/sender_auth/senders/new)
-    - ![Sendgrid email verification](./docs/images/sendgrid_email_verification.png)
-    - Complete the form and after successful completion you can put your verified email to `.env`
-
 ## Admin panel
 
 On the admin panel, you can use 2 new paragraphs in **Settings** and **Content Manager**
@@ -122,7 +103,7 @@ subscriptions
 ### API
 
 We can present our **REST API**, which allows your customers to manipulate Stripe via our plugin. Customers can create
-organizations, invite other users to organizations, make purchases and transactions, and subscribe to products with
+organizations, add other users to organizations, make purchases and transactions, and subscribe to products with
 specified plan types.
 
 #### Content types
@@ -145,7 +126,6 @@ The organization fields
 | `payment_method_id` | string               | Stripe payment method ID for the organization                           |
 | `owner_id`          | string               | User ID of the organization's owner                                     |
 | `users`             | relation (oneToMany) | List of users in the organization (linked to `users-permissions.user`)  |
-| `invites`           | relation (oneToMany) | Invites associated with the organization (linked to `invite`)           |
 | `subscription`      | relation (oneToOne)  | Subscription linked to the organization (linked to `subscription`)      |
 | `purchases`         | relation (oneToMany) | Purchases made by the organization (linked to `purchase`)               |
 | `quantity`          | integer              | Quantity related to the organization's subscription or purchases        |
@@ -220,21 +200,6 @@ purchases.
 | `status`              | enumeration          | Transaction status: `pending`, `completed`, `failed`               |
 | `externalTransaction` | json                 | Data from the external payment system (e.g., Stripe)               |
 
-##### Invite
-
-To add a user, we should create a personal invite for a specified user and send it. In our realization, we send invites
-to users by email. The Invitation flow was made based on GitHub flow, but you can modify it because Stripe has no entity
-`invite`.
-
-| Attribute      | Type                 | Description                                                   |
-|----------------|----------------------|---------------------------------------------------------------|
-| `id`           | number               | Unique invite ID in database                                  |
-| `token`        | string               | Unique invitation token                                       |
-| `email`        | string               | Email address of the invited user                             |
-| `user`         | relation (manyToOne) | User associated with the invite (related to `user`)           |
-| `organization` | relation (manyToOne) | Organization linked to the invite (related to `organization`) |
-| `status`       | enumeration          | Invite status: `pending`, `accepted`, `cancelled`             |
-
 #### User routes
 
 | Method | Endpoint                                                     |
@@ -247,7 +212,6 @@ to users by email. The Invitation flow was made based on GitHub flow, but you ca
 | PATCH  | /stripe-payment/api/organizations/:id/owner                  |
 | PATCH  | /stripe-payment/api/organizations/:id/users                  |
 | PATCH  | /stripe-payment/api/organizations/:id/remove-user            |
-| PATCH  | /stripe-payment/api/organizations/:id/invites/accept         |
 | PATCH  | /stripe-payment/api/organizations/:id/default-payment-method |
 | GET    | /stripe-payment/api/plans/:id                                |
 | POST   | /stripe-payment/api/subscriptions/checkout-session           |
@@ -284,7 +248,6 @@ DBBS Pre-Built Solutions is open-source software licensed under the [MIT License
 - [DBB-Software](https://dbbsoftware.com/)
 - [Strapi Documentation](https://docs.strapi.io)
 - [Strapi Plugins](https://strapi.io/plugins)
-- [SendGrid](https://sendgrid.com)
 - [Stripe](https://stripe.com)
 - [TypeScript](https://www.typescriptlang.org)
 - [Linting Best Practices](https://eslint.org/)
