@@ -21,6 +21,7 @@ export interface Plan {
   interval: BillingPeriod
   stripe_id: string
   currency: SupportedCurrency
+  type: PlanType
   product: {
     name: string
     id: number
