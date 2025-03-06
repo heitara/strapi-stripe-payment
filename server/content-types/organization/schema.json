@@ -28,12 +28,6 @@
       "relation": "oneToMany",
       "target": "plugin::users-permissions.user"
     },
-    "invites": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::stripe-payment.invite",
-      "mappedBy": "organization"
-    },
     "subscription": {
       "type": "relation",
       "relation": "oneToOne",
