@@ -403,7 +403,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       where: { stripe_id: event.data.object.id },
       data: {
         price: (event.data.object.unit_amount as number) / 100,
-        interval: planInterval,
+        interval: planInterval || null,
         stripe_id: event.data.object.id,
         type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
         product: product.id
@@ -570,10 +570,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     prices.data.forEach((price) => {
       if (!existingPlans.includes(price.id)) {
+        const planInterval = price.recurring?.interval
         newPlansData.push({
           price: price.unit_amount / 100,
-          interval: price.recurring?.interval,
+          interval: planInterval,
           stripe_id: price.id,
+          type: planInterval ? PlanType.RECURRING : PlanType.ONE_TIME,
           product: product.id
         })
       }
