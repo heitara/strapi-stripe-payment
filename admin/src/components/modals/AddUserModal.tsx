@@ -89,7 +89,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             Cancel
           </Button>
         }
-        endActions={<Button onClick={handleSave}>Send Invite</Button>}
+        endActions={<Button onClick={handleSave}>Add user</Button>}
       />
     </ModalLayout>
   )

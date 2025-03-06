@@ -106,7 +106,7 @@ const OrganizationDetail: React.FC = () => {
     setNewUserEmail('')
     toggleNotification({
       type: 'success',
-      message: 'Invitation sent successfully'
+      message: 'User added successfully'
     })
   }
 
