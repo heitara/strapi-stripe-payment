@@ -235,7 +235,7 @@ purchases.
 
 ## License
 
-DBBS Pre-Built Solutions is open-source software licensed under the [MIT License](LICENSE).
+DBBS Strapi-stripe payment is open-source software licensed under the [MIT License](LICENSE).
 
 ## Authors
 
